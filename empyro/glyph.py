@@ -1,13 +1,14 @@
 from typing import Union, Text
 
-import color
-from color import Color
-from charcode import CharCode
+from . import color
+from .color import Color
+from .charcode import CharCode
+
 
 class Glyph:
     def __init__(self, code: Union[Text, CharCode],
-                 fg_color: Color=None,
-                 bg_color: Color=None):
+                 fg_color: Color = None,
+                 bg_color: Color = None):
         if not isinstance(code, CharCode):
                 code = CharCode(ord(code))
         self.code = code

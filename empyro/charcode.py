@@ -5,7 +5,6 @@ this module defines:
         CharCode.altcode -- the alt code of the character, for convenience.
 
     altcodes -- a mapping from code points to alt codes
-
 """
 
 from enum import IntEnum
@@ -14,6 +13,7 @@ from enum import IntEnum
 class CharCode(IntEnum):
     # 0
     NULL = 0x0000
+
     # 1 - 15.
     WHITE_SMILING_FACE = 0x263a
     BLACK_SMILING_FACE = 0x263b
