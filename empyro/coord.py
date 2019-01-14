@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import NamedTuple, Union
 
 Point = NamedTuple('Point', [('x', int), ('y', int)])
 
@@ -25,13 +25,16 @@ class Rect(_Rect):
     def bottom_left(self) -> Point:
         return Point(self.x, self.y + self.height)
 
-    def __contains__(self, other):
-        if isinstance(other, Rect):
-            return (contains_point(self, other.top_left) and
-                    contains_point(self, other.bottom_right))
-        elif isinstance(other, Point):
-            return contains_point(self, other)
-        raise TypeError('object must be of type Rect or Point')
+    def __contains__(self, other: Union['Rect', Point]):
+        _len = len(other)
+        if _len == 2:
+            return self._contains_point(other)
+        elif _len == 4:
+            other = Rect(*other)
+            return (self._contains_point(other.top_right) and
+                    self._contains_point(other.bottom_left))
+        raise TypeError('left operand must be of type Rect, '
+                        'Point, or a sequence of length 2 or 4')
 
     def _contains_point(self, point: Point) -> bool:
         return (self.x + self.width >= point.x >= self.x and
