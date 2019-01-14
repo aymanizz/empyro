@@ -4,13 +4,14 @@ this module defines:
     class CharCode(IntEnum) -- an enum of the unicode code points.
         CharCode.altcode -- the alt code of the character, for convenience.
 
-    altcodes -- a mapping from code points to alt codes
+    altcodes -- a mapping from code points to alt codes.
 """
 
 from enum import IntEnum
 
 
 class CharCode(IntEnum):
+    """Enum for unicode code points of characters in code page 437."""
     # 0
     NULL = 0x0000
 
@@ -300,6 +301,7 @@ class CharCode(IntEnum):
     @property
     def altcode(self) -> int:
         return altcodes[self]
+
 
 # alt codes for code page 437.
 altcodes = {
