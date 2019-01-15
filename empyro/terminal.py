@@ -43,12 +43,9 @@ class Terminal(ABC):
 
         If no colors are specified, the default colors are used.
         """
-        if fg_color is None:
-            fg_color = self.fg_color
-        if bg_color is None:
-            bg_color = self.bg_color
-        self.draw_glyph(
-            at, Glyph(char, self.fg_color, self.bg_color))
+        fg_color = self.fg_color if fg_color is None else fg_color
+        bg_color = self.bg_color if bg_color is None else bg_color
+        self.draw_glyph(Glyph(char, fg_color, bg_color), at)
         return self
 
     def fill(self, bg: Color, window: Rect):
@@ -60,7 +57,7 @@ class Terminal(ABC):
         _glyph = Glyph(CharCode.SPACE, None, bg)
         for _y in range(window[1], window[3]):
             for _x in range(window[0], window[2]):
-                self.draw_glyph(Point(_x, _y), _glyph)
+                self.draw_glyph(_glyph, Point(_x, _y))
         return self
 
     def clear(self, window: Rect = None):
@@ -69,10 +66,10 @@ class Terminal(ABC):
         Optionally, a `window` argument can be passed to clear just
         that portion.
         """
+        window = self.rect if window is None else window
         if window not in self.rect:
             raise ValueError('window out of bounds')
 
-        window = self.rect if window is None else window
         self.fill(self.bg_color, window)
         return self
 
@@ -83,6 +80,11 @@ class Terminal(ABC):
 
     @abstractmethod
     def draw_glyph(self, glyph_: Glyph, at: Point):
+        """Draw a glyph at the specified position.
+
+        implementations may or may not render the result of writing
+        to the screen.
+        """
         pass
 
 
@@ -96,7 +98,7 @@ class Subterminal(Terminal):
     Any writes to the subterminal are writes to the root terminal.
     """
     def __init__(self, root: Terminal, window: Rect):
-        if window not in root._rect:
+        if window not in root.rect:
             raise ValueError('window out of bounds')
         super().__init__((window[2], window[3]))
         self.rect = Rect(*window)
@@ -108,11 +110,11 @@ class Subterminal(Terminal):
 
     # override to eliminate nested subterminals
     def view(self, window: Rect):
-        if window not in self._view_window:
+        if window not in self.rect:
             raise ValueError('window out of bounds')
         return Subterminal(self._root, window)
 
     def draw_glyph(self, glyph_: Glyph, at: Point):
-        point = Point(self._view_window.x + at[0],
-                      self._view_window.y + at[1])
-        self._root.draw_glyph(point, glyph_)
+        point = Point(self.rect.x + at[0],
+                      self.rect.y + at[1])
+        self._root.draw_glyph(glyph_, point)
