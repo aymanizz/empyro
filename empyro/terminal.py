@@ -21,16 +21,19 @@ class Terminal(ABC):
     Only requires the implementation of the `draw_glyph` method.
 
     properties:
-        rect -- the rectangle that defines the shape of the terminal,
+        size -- the rectangle that defines the size of the terminal,
                 mainly its width and height.
-                terminal instances always have x and y set to 0.
+                terminal instances always have x and y set to 0
+                and defaults to a size of 80x24.
         fg_color -- default foreground color.
         bg_color -- default background color.
     """
-    def __init__(self, size: Size):
+
+    def __init__(self, size: Size = None):
         self.bg_color = color.BLACK
         self.fg_color = color.WHITE
-        self.rect = Rect(0, 0, *size)
+        size = (80, 24) if size is None else size
+        self.size = Rect(0, 0, *size)
 
     def color(self, fg: Color, bg: Color):
         """Set the default foreground and background colors."""
@@ -51,7 +54,7 @@ class Terminal(ABC):
     def fill(self, bg: Color, window: Rect):
         """Fill a portion of the terminal with the specified color.
         """
-        if window not in self.rect:
+        if window not in self.size:
             raise ValueError('window out of bounds')
 
         _glyph = Glyph(CharCode.SPACE, None, bg)
@@ -66,8 +69,8 @@ class Terminal(ABC):
         Optionally, a `window` argument can be passed to clear just
         that portion.
         """
-        window = self.rect if window is None else window
-        if window not in self.rect:
+        window = self.size if window is None else window
+        if window not in self.size:
             raise ValueError('window out of bounds')
 
         self.fill(self.bg_color, window)
@@ -97,11 +100,12 @@ class Subterminal(Terminal):
 
     Any writes to the subterminal are writes to the root terminal.
     """
+
     def __init__(self, root: Terminal, window: Rect):
-        if window not in root.rect:
+        if window not in root.size:
             raise ValueError('window out of bounds')
         super().__init__((window[2], window[3]))
-        self.rect = Rect(*window)
+        self.size = Rect(*window)
         self._root = root
 
     @property
@@ -110,11 +114,11 @@ class Subterminal(Terminal):
 
     # override to eliminate nested subterminals
     def view(self, window: Rect):
-        if window not in self.rect:
+        if window not in self.size:
             raise ValueError('window out of bounds')
         return Subterminal(self._root, window)
 
     def draw_glyph(self, glyph_: Glyph, at: Point):
-        point = Point(self.rect.x + at[0],
-                      self.rect.y + at[1])
+        point = Point(self.size.x + at[0],
+                      self.size.y + at[1])
         self._root.draw_glyph(glyph_, point)
