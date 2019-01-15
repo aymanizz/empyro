@@ -25,6 +25,25 @@ class Rect(_Rect):
     Defines the following properties for getting the rectangle corners:
         top_left, top_right, bottom_right
     """
+
+    @property
+    def size(self) -> Size:
+        """The size of the rectangle.
+
+        >>> Rect(1, 2, 3, 4).size == Size(3, 4)
+        True
+        """
+        return Size(self.width, self.height)
+
+    @property
+    def center(self) -> Point:
+        """The center of the rectangle.
+
+        >>> Rect(0, 0, 4, 6).center == Point(2, 3)
+        True
+        """
+        return Point(self.width // 2, self.height // 2)
+
     @property
     def top_left(self) -> Point:
         """The top left corner point of the rectangle
