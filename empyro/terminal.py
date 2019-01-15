@@ -122,3 +122,14 @@ class Subterminal(Terminal):
         point = Point(self.size.x + at[0],
                       self.size.y + at[1])
         self._root.draw_glyph(glyph_, point)
+
+
+class RenderableTerminal(Terminal, ABC):
+    """A renderable terminal is a terminal that guarantees the results of
+    writes are fully written after the `render` method is called.
+    """
+    @abstractmethod
+    def render(self):
+        """Render the terminal displaying all writes to the screen.
+        """
+        pass
