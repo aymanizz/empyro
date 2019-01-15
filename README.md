@@ -2,6 +2,15 @@
 
 Terminal emulator in python. Still in early development stage.
 
+## Requirements
+
+a `requirements-dev.txt` is provided. although not required as the only dependency
+is used by `SurfaceTerminal`, an implementation of the `Terminal` ABC.
+
+```
+pip install -r requirements-dev.txt
+```
+
 ## Running The Tests
 
 run the script `tests.py`, which will discover any module inside the
