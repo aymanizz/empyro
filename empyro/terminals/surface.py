@@ -1,5 +1,3 @@
-from itertools import product
-
 import pygame
 
 from empyro.coord import Point, Size, Rect
