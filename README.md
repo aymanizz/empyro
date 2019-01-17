@@ -16,6 +16,15 @@ pip install -r requirements-dev.txt
 run the script `tests.py`, which will discover any module inside the
 package `empyro` and run its doctests.
 
+## Running an Example
+
+To run any of the examples, say `examples/basic.py`, run it as a module from
+top directory:
+
+```
+python -m examples.basic
+```
+
 ## Acknowledgements
 
 I drew inspiration from these two great projects:
