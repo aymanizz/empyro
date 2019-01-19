@@ -6,7 +6,7 @@ defines the following classes:
 """
 
 from abc import ABC, abstractmethod
-from typing import Union, Text
+from typing import Union, Text, List
 
 from . import color
 from . import glyph
@@ -40,17 +40,24 @@ class Terminal(ABC):
         self.fg_color, self.bg_color = fg, bg
         return self
 
-    def write_at(self, char: Union[Text, CharCode], at: Point,
-                 fg_color: Color = None, bg_color: Color = None):
-        """Write a character at the specified position.
+    def write_at(self, text: Union[Text, CharCode, List[CharCode]],
+                 at: Point, fg_color: Color = None, bg_color: Color = None):
+        """Write text at the specified position.
+        A string or list of charcodes or a charcode can be passed as the
+        text parameter.
 
         If no colors are specified, the default colors are used.
         """
-        if at not in self.size:
+        if isinstance(text, CharCode):
+            text = [text]
+        if (at not in self.size or
+            at[0] + len(text) - 1 >= self.size.top_right.x):
             raise ValueError('writing out of bound')
         fg_color = self.fg_color if fg_color is None else fg_color
         bg_color = self.bg_color if bg_color is None else bg_color
-        self.draw_glyph(Glyph(char, fg_color, bg_color), at)
+        for pos, char in enumerate(text):
+            self.draw_glyph(
+                Glyph(char, fg_color, bg_color), Point(at[0] + pos, at[1]))
         return self
 
     def fill(self, bg: Color, window: Rect):
