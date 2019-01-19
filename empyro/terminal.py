@@ -40,7 +40,7 @@ class Terminal(ABC):
         self.fg_color, self.bg_color = fg, bg
         return self
 
-    def write_at(self, text: Union[Text, CharCode, List[CharCode]],
+    def write(self, text: Union[Text, CharCode, List[CharCode]],
                  at: Point, fg_color: Color = None, bg_color: Color = None):
         """Write text at the specified position.
         A string or list of charcodes or a charcode can be passed as the

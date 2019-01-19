@@ -24,7 +24,7 @@ for y, line in enumerate(text):
             Color, [[randint(0, 255) for _ in range(3)] for _ in range(2)])
         if char == ' ':
             bg = color.BLACK
-        terminal.write_at(' ', (x, y), fg, bg)
+        terminal.write(' ', (x, y), fg, bg)
 
 terminal.render()
 input('Press enter to exit.')
