@@ -93,17 +93,21 @@ class Rect(_Rect):
         True
         >>> (1, 2, 3, 4) in Rect(4, 4, 4, 4)
         False
+        >>> (5, 5, 10, 10) in Rect(5, 5, 10, 10)
+        True
+        >>> (15, 15) in Rect(5, 5, 10, 10)
+        False
         """
         _len = len(other)
         if _len == 2:
             return self._contains_point(other)
         elif _len == 4:
-            other = Rect(*other)
-            return (self._contains_point(other.top_left) and
-                    self._contains_point(other.bottom_right))
+            return (self._contains_point((other[0], other[1])) and
+                    self.x + self.width >= other[0] + other[2] and
+                    self.y + self.height >= other[1] + other[3])
         raise TypeError('left operand must be of type Rect, '
                         'Point, or a sequence of length 2 or 4')
 
     def _contains_point(self, point: Point) -> bool:
-        return (self.x + self.width >= point[0] >= self.x and
-                self.y + self.height >= point[1] >= self.y)
+        return (self.x <= point[0] < self.x + self.width and
+                self.y <= point[1] < self.y + self.height)
