@@ -46,6 +46,8 @@ class Terminal(ABC):
 
         If no colors are specified, the default colors are used.
         """
+        if at not in self.size:
+            raise ValueError('writing out of bound')
         fg_color = self.fg_color if fg_color is None else fg_color
         bg_color = self.bg_color if bg_color is None else bg_color
         self.draw_glyph(Glyph(char, fg_color, bg_color), at)
@@ -105,7 +107,7 @@ class Subterminal(Terminal):
         if window not in root.size:
             raise ValueError('window out of bounds')
         super().__init__((window[2], window[3]))
-        self.size = Rect(*window)
+        self.view_window = Rect(*window)
         self._root = root
 
     @property
@@ -119,8 +121,8 @@ class Subterminal(Terminal):
         return Subterminal(self._root, window)
 
     def draw_glyph(self, glyph_: Glyph, at: Point):
-        point = Point(self.size.x + at[0],
-                      self.size.y + at[1])
+        point = Point(self.view_window.x + at[0],
+                      self.view_window.y + at[1])
         self._root.draw_glyph(glyph_, point)
 
 
