@@ -4,12 +4,12 @@ from empyro.coord import Point, Size, Rect
 from empyro import color
 from empyro.glyph import Glyph
 from empyro.terminal import RenderableTerminal
-
+from empyro.mixin import DrawMixin
 from empyro import font as font_
 from empyro.font import Font
 
 
-class SurfaceTerminal(RenderableTerminal):
+class SurfaceTerminal(DrawMixin, RenderableTerminal):
     """A renderable terminal using pygame surfaces
 
     properties
@@ -30,30 +30,30 @@ class SurfaceTerminal(RenderableTerminal):
         self.line_height = self.font.size.height
         size = (self.size.width * self.font.size.width,
                 self.size.height * self.font.size.height)
-        self._update_rects = []
         try:
-            self.surface = pygame.display.set_mode(size)
+            self.display = pygame.display.set_mode(size)
             self._font_surface, self._glyph_surfaces = _load_glyphs(self.font)
         except:
             pygame.display.quit()
             raise
 
-    def draw_glyph(self, glyph: Glyph, at: Point):
-        glyph_surf = self._glyph_surfaces[glyph.code.altcode]
+    def _get_render_surfaces(self):
         draw_surf = pygame.Surface(self.font.size)
         draw_surf.set_colorkey(color.BLACK)
-        draw_surf.blit(glyph_surf, (0, 0))
-        draw_surf.fill(glyph.fg_color, None, pygame.BLEND_MULT)
-        draw_rect = (at[0] * self.char_width,
-                     at[1] * self.line_height,
-                     self.char_width, self.line_height)
-        self.surface.fill(glyph.bg_color, draw_rect)
-        rect = self.surface.blit(draw_surf, draw_rect)
-        self._update_rects.append(rect)
+        for at, glyph in self.consume_changed_cells():
+            glyph_surf = self._glyph_surfaces[glyph.code.altcode]
+            draw_surf.blit(glyph_surf, (0, 0))
+            draw_surf.fill(glyph.fg_color, None, pygame.BLEND_MULT)
+            draw_rect = (at[0] * self.char_width,
+                         at[1] * self.line_height,
+                         self.char_width, self.line_height)
+            self.display.fill(glyph.bg_color, draw_rect)
+            yield draw_surf, draw_rect
+            draw_surf.fill(color.BLACK)
 
     def render(self):
-        pygame.display.update(self._update_rects)
-        self._update_rects = []
+        rects = self.display.blits(self._get_render_surfaces())
+        pygame.display.update(rects)
 
 
 def _load_glyphs(font: Font):
