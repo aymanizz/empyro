@@ -1,4 +1,5 @@
-"""Provide a way to manage the display state in an efficient way.
+"""Provide a way to register changes made through calls to draw
+allowing rendering in an efficient way.
 
 This is achieved by maintaining a dict of the cells changed from last update.
 This way a change only has a cost if it's really a change,
@@ -7,45 +8,52 @@ update.
 
 Multiple writes that result in the same glyph that was in the cell from last
 update will have no effect, and will not be on the changed glyphs dict.
+
+This module defines:
+    DrawMixin -- a mix-in class for RenderableTerminal subclasses.
 """
 
-from typing import Callable, KeysView
+from typing import ItemsView
+from contextlib import contextmanager
 
 from . import glyph
 from .glyph import Glyph
 from .coord import Point, Size, Rect
 
 
-class Display:
-    def __init__(self, size: Size,
-                 render_callback: Callable[[Glyph, Point], None] = None):
-        self.size = Rect(0, 0, *size)
+class DrawMixin:
+    """A mix-in class for efficient drawing.
+
+    Use this class as a mix-in when implementing the base class
+    `RenderableTerminal`, by inheriting from it:
+    `class TermImpl(DrawMixin, RenderableTerminal)`.
+
+    The mix-in provides an implementation for the `draw_glyph` abstract method,
+    and a context manager `render_cells` for getting the dirty cells to help
+    implementing `render` abstract method.
+    """
+
+    def __init__(self, size: Size = None):
+        super().__init__(size)
         self._cells = [
             [glyph.CLEAR for y in range(self.size.height)]
             for x in range(self.size.width)
         ]
         self._changed_cells = {}
-        self.render_callback = render_callback
 
-    def get_dirty_cells(self) -> KeysView:
-        """Get the positions of the changed glyphs.
+    def consume_changed_cells(self) -> ItemsView:
+        """Generator to consume the modified cells.
+        Use it to get the changed cells in the `render` method.
         """
-        return self._changed_cells.keys()
+        for at, glyph_ in self._changed_cells.items():
+            yield at, glyph_
+            self._cells[at[0]][at[1]] = glyph_
+        self._changed_cells.clear()
 
-    def set_glyph(self, glyph_: Glyph = None, at: Point):
-        """Set the cell at `at` to `glyph_`
-        """
+    def draw_glyph(self, glyph_: Glyph, at: Point):
         if at not in self.size:
-            raise ValueError('out of bounds error')
+            raise ValueError('draw out of bounds')
         if self._cells[at[0]][at[1]] == glyph_:
             self._changed_cells.pop(at, None)
         else:
             self._changed_cells[at] = glyph_
-
-    def render(self):
-        """Call the `render_callback` for the changed cells.
-        """
-        for (x, y), glyph in self._changed_cells.items():
-            self.render_callback(glyph, (x, y))
-            self._cells[x][y] = glyph
-        self._changed_cells.clear()
