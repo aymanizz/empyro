@@ -1,6 +1,6 @@
 import pygame
 
-from empyro.coord import Point, Size, Rect
+from empyro.coord import Size
 from empyro import color
 from empyro.glyph import Glyph
 from empyro.terminal import RenderableTerminal
@@ -18,7 +18,8 @@ class SurfaceTerminal(DrawMixin, RenderableTerminal):
                 loaded using `font.load_fonts` function.
         char_width -- the character width. taken from the font.
         line_height -- the line height of a character. taken from the font.
-        surface -- the underlying pygame surface used to render the terminal.
+        display -- the underlying pygame surface (also the pygame display)
+                used to render the terminal.
     """
 
     def __init__(self, size: Size = None, font: Font = None):

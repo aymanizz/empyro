@@ -3,7 +3,7 @@ allowing rendering in an efficient way.
 
 This is achieved by maintaining a dict of the cells changed from last update.
 This way a change only has a cost if it's really a change,
-i.e. the glyph have actually changed between the last update and the current
+i.e. the cell have actually changed between the last update and the current
 update.
 
 Multiple writes that result in the same glyph that was in the cell from last
@@ -13,8 +13,7 @@ This module defines:
     DrawMixin -- a mix-in class for RenderableTerminal subclasses.
 """
 
-from typing import ItemsView
-from contextlib import contextmanager
+from typing import Iterator, Tuple
 
 from . import glyph
 from .glyph import Glyph
@@ -29,8 +28,8 @@ class DrawMixin:
     `class TermImpl(DrawMixin, RenderableTerminal)`.
 
     The mix-in provides an implementation for the `draw_glyph` abstract method,
-    and a context manager `render_cells` for getting the dirty cells to help
-    implementing `render` abstract method.
+    and a generator `consume_changed_cells` for getting the changed cells to
+    help implementing `render` abstract method.
     """
 
     def __init__(self, size: Size = None):
@@ -41,9 +40,11 @@ class DrawMixin:
         ]
         self._changed_cells = {}
 
-    def consume_changed_cells(self) -> ItemsView:
+    def consume_changed_cells(self) -> Iterator[Tuple[Point, Glyph]]:
         """Generator to consume the modified cells.
         Use it to get the changed cells in the `render` method.
+
+        Yield a tuple of the changed cell position and the new glyph.
         """
         for at, glyph_ in self._changed_cells.items():
             yield at, glyph_
