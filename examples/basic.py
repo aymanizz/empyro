@@ -1,7 +1,7 @@
 from random import randint
 from itertools import starmap
 
-from empyro import Color
+from empyro import color
 from empyro.color import Color
 from empyro.terminals.surface import SurfaceTerminal
 
