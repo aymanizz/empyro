@@ -3,7 +3,7 @@ from itertools import starmap
 
 from empyro import color
 from empyro.color import Color
-from empyro.terminals.surface import SurfaceTerminal
+from empyro.backends.surface import SurfaceTerminal
 
 # generated using https://www.ascii-art-generator.org/
 text = r"""
