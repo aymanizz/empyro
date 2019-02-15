@@ -11,6 +11,7 @@ from typing import Union, Text, List
 from . import color
 from . import glyph
 from .color import Color
+from .key import Key
 from .glyph import Glyph
 from .charcode import CharCode
 from .coord import Point, Size, Rect
@@ -39,6 +40,13 @@ class Terminal(ABC):
         """Set the default foreground and background colors."""
         self.fg_color, self.bg_color = fg, bg
         return self
+
+    def read(self):
+        """Read input from user.
+        """
+        # FUTURE: provide functionalities like cbreak, echo, echo handlers,
+        # and reading text instead of just a char.
+        return self.get_key()
 
     def write(self, text: Union[Text, CharCode, List[CharCode]],
                  at: Point, fg_color: Color = None, bg_color: Color = None):
@@ -91,6 +99,12 @@ class Terminal(ABC):
         return Subterminal(self, window)
 
     @abstractmethod
+    def get_key(self) -> Key:
+        """Return the pressed key.
+        """
+        pass
+
+    @abstractmethod
     def draw_glyph(self, glyph_: Glyph, at: Point):
         """Draw a glyph at the specified position.
 
@@ -131,6 +145,9 @@ class Subterminal(Terminal):
         point = Point(self.view_window.x + at[0],
                       self.view_window.y + at[1])
         self._root.draw_glyph(glyph_, point)
+
+    def get_key(self):
+        return self._root.get_key()
 
 
 class RenderableTerminal(Terminal, ABC):

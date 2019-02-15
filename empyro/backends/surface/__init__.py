@@ -3,6 +3,7 @@ import pygame
 from empyro.coord import Size
 from empyro import color
 from empyro.glyph import Glyph
+from empyro.key import Key, KeyCode, KeyMod
 from empyro.terminal import RenderableTerminal
 from empyro.mixin import DrawMixin
 from empyro import font as font_
@@ -34,6 +35,9 @@ class SurfaceTerminal(DrawMixin, RenderableTerminal):
         try:
             self.display = pygame.display.set_mode(size)
             self._font_surface, self._glyph_surfaces = _load_glyphs(self.font)
+            pygame.event.set_allowed(None)
+            pygame.event.set_allowed([pygame.KEYDOWN])
+            pygame.key.set_repeat(500, 200)
         except:
             pygame.display.quit()
             raise
@@ -56,6 +60,28 @@ class SurfaceTerminal(DrawMixin, RenderableTerminal):
         rects = self.display.blits(self._get_render_surfaces())
         pygame.display.update(rects)
 
+    def get_key(self):
+        pygame.event.clear()
+        while True:
+            c = map_key_code(pygame.event.wait())
+            if c is not None:
+                # get the mods state
+                m = KeyMod.NO_MOD
+                mods = pygame.key.get_mods()
+                if mods & pygame.KMOD_CTRL:
+                    m |= KeyMod.CTRL
+                if mods & pygame.KMOD_SHIFT:
+                    m |= KeyMod.SHIFT
+                if mods & pygame.KMOD_ALT:
+                    m |= KeyMod.ALT
+                return Key(c, m)
+
+
+def map_key_code(event):
+    try:
+        return KeyCode(event.key)
+    except:
+        return None
 
 def _load_glyphs(font: Font):
     char_width, line_height = font.size
