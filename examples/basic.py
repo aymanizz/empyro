@@ -3,6 +3,7 @@ from itertools import starmap
 
 from empyro import color
 from empyro.color import Color
+from empyro.key import KeyCode, KeyMod
 from empyro.backends.surface import SurfaceTerminal
 
 # generated using https://www.ascii-art-generator.org/
@@ -27,4 +28,9 @@ for y, line in enumerate(text):
         terminal.write(' ', (x, y), fg, bg)
 
 terminal.render()
-input('Press enter to exit.')
+
+print("press CTRL+ESC to exit.")
+while True:
+    k = terminal.read()
+    if k.code == KeyCode.ESCAPE and k.mod == KeyMod.CTRL:
+        break
